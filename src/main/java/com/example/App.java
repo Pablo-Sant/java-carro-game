@@ -14,10 +14,17 @@ public class App extends Application {
             // Versão simplificada para testar a estrutura
             GameManager gameManager = new GameManager();
             Scene scene = new Scene(gameManager.getRoot(), 800, 600);
+
+            // ✅ CONFIGURAÇÃO EXTRA DE FOCO NA SCENE
+            scene.setOnMouseClicked(event -> {
+                gameManager.getRoot().requestFocus();
+            });
             
             stage.setTitle("Jogo de Carro - Desvie dos Obstáculos!");
             stage.setScene(scene);
             stage.show();
+
+            gameManager.getRoot().requestFocus();
             
             System.out.println("Jogo iniciado com sucesso!");
             

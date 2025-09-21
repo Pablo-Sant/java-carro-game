@@ -7,7 +7,6 @@ public class PlayerView {
     private Rectangle carroView;
     
     public PlayerView() {
-        //  Toda a configuração VISUAL fica aqui na View
         carroView = new Rectangle(40, 70, Color.RED);
         carroView.setArcWidth(10);  // Cantos arredondados
         carroView.setArcHeight(10); // Cantos arredondados

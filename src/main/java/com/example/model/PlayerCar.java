@@ -1,9 +1,9 @@
 package com.example.model;
 
 public class PlayerCar {
-    private double x;
-    private double y;
-    private double velocidade = 5;
+    private double x;        // Posição horizontal
+    private double y;        // Posição vertical (fixa)
+    private double velocidadeLateral = 20;  // Velocidade de movimento lateral
     
     public PlayerCar(double startX, double startY) {
         this.x = startX;
@@ -11,19 +11,26 @@ public class PlayerCar {
     }
     
     public void moverEsquerda() {
-        //  Limites ajustados para a pista de 500px de largura
-        if (x > 170) { // Não sai da pista (150 + margem)
-            x -= velocidade;
+        // Move para esquerda DIMINUINDO a posição X
+        if (x > 200) { // Limite esquerdo da pista
+            x -= velocidadeLateral;
         }
     }
     
     public void moverDireita() {
-        //  Limites ajustados para a pista de 500px de largura  
-        if (x < 630) { // Não sai da pista (650 - largura carro - margem)
-            x += velocidade;
+        // Move para direita AUMENTANDO a posição X  
+        if (x < 600) { // Limite direito da pista
+            x += velocidadeLateral;
         }
     }
     
+    //  Métodos de acesso
     public double getX() { return x; }
     public double getY() { return y; }
+    public double getVelocidadeLateral() { return velocidadeLateral; }
+    
+    // Se quiser ajustar a velocidade lateral posteriormente
+    public void setVelocidadeLateral(double velocidade) {
+        this.velocidadeLateral = velocidade;
+    }
 }
