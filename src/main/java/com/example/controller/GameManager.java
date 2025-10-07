@@ -27,9 +27,8 @@ public class GameManager {
     private List<ObstacleView> obstacleViews;
     private Random random;
     private long ultimoObstaculoTime = 0;
-    private int pontuacao;
-
-
+    private int vidas = 5; // ✅ COMEÇA COM 5 VIDAS
+    private boolean jogoAtivo = true; // ✅ CONTROLE DE ESTADO DO JOGO
     
     public GameManager() {
         root = new Pane();
@@ -51,42 +50,35 @@ public class GameManager {
         root.getChildren().add(roadView.getRoot());
         root.getChildren().add(playerView.getView());
         
-        // ✅ CONFIGURAÇÃO CORRETA DO FOCO E INPUT
         configurarControles();
+        System.out.println("🎮 Jogo iniciado! Vidas: " + vidas);
     }
     
     private void configurarControles() {
-        // ✅ 1. Configura os handlers de teclado
         root.setOnKeyPressed(event -> {
-            System.out.println("Tecla pressionada: " + event.getCode());
+            if (!jogoAtivo) return; // ✅ Só move se o jogo estiver ativo
             
             if (event.getCode() == KeyCode.LEFT) {
-                //System.out.println("Movendo para ESQUERDA");
                 moverCarroEsquerda();
             } else if (event.getCode() == KeyCode.RIGHT) {
-                //System.out.println("Movendo para DIREITA");
                 moverCarroDireita();
             }
         });
         
-        // ✅ 2. Garante que o root é focalizável
         root.setFocusTraversable(true);
-        
-        // ✅ 3. Solicita foco IMEDIATAMENTE
         root.requestFocus();
-        
-        System.out.println("Controles configurados! Pressione ← ou →");
     }
     
     private void setupGameLoop() {
         gameLoop = new AnimationTimer() {
             @Override
             public void handle(long now) {
-                animarCenario();
-                atualizarObstaculos();
-                gerarObstaculos(now);
-                verificarColisoes();
-                atualizarPontuacao();
+                if (jogoAtivo) { // ✅ Só atualiza se o jogo estiver ativo
+                    animarCenario();
+                    atualizarObstaculos();
+                    gerarObstaculos(now);
+                    verificarColisoes();
+                }
             }
         };
         gameLoop.start();
@@ -102,10 +94,9 @@ public class GameManager {
         }
     }
 
-        private void gerarObstaculos(long now) {
-        // Gera obstáculos a cada 2 segundos
+    private void gerarObstaculos(long now) {
         if (now - ultimoObstaculoTime > 1_000_000_000L) {
-            if (random.nextDouble() < 0.6) { // 60% de chance
+            if (random.nextDouble() < 0.6) {
                 criarNovoObstaculo();
             }
             ultimoObstaculoTime = now;
@@ -119,8 +110,6 @@ public class GameManager {
         obstaculos.add(obstaculo);
         obstacleViews.add(obstacleView);
         root.getChildren().add(obstacleView.getView());
-        
-        System.out.println("Novo obstáculo: " + obstaculo.getTipo());
     }
 
     private void atualizarObstaculos() {
@@ -132,67 +121,82 @@ public class GameManager {
             obstacleView.updatePosition(obstaculo.getX(), obstaculo.getY());
             
             if (obstaculo.isForaDaTela()) {
-                // Remove obstáculo que saiu da tela
                 root.getChildren().remove(obstacleView.getView());
                 obstaculos.remove(i);
                 obstacleViews.remove(i);
-                pontuacao += 10; // Pontua por evitar obstáculo
-                System.out.println("Pontuação: " + pontuacao);
             }
         }
     }
 
-        private void verificarColisoes() {
+    private void verificarColisoes() {
         for (Obstacle obstaculo : obstaculos) {
             if (colidiuComPlayer(obstaculo)) {
-                gameOver();
-                break;
+                tratarColisao(obstaculo);
+                break; // Só processa uma colisão por frame
             }
         }
     }
 
     private boolean colidiuComPlayer(Obstacle obstaculo) {
-        // Colisão simples retângulo x retângulo
         double playerX = playerModel.getX();
         double playerY = playerModel.getY();
-        double playerWidth = 40; // Largura do carro
-        double playerHeight = 70; // Altura do carro
+        double playerWidth = 40;
+        double playerHeight = 70;
         
-        return playerX < obstaculo.getX() + obstaculo.getWidth() &&
-               playerX + playerWidth > obstaculo.getX() &&
-               playerY < obstaculo.getY() + obstaculo.getHeight() &&
-               playerY + playerHeight > obstaculo.getY();
+        // ✅ COLISÃO MAIS PRECISA
+        boolean colidindo = playerX < obstaculo.getX() + obstaculo.getWidth() &&
+                           playerX + playerWidth > obstaculo.getX() &&
+                           playerY < obstaculo.getY() + obstaculo.getHeight() &&
+                           playerY + playerHeight > obstaculo.getY();
+        
+        // ✅ DEBUG (descomente se quiser ver as colisões)
+        if (colidindo) {
+            System.out.println("💥 Colisão detectada com: " + obstaculo.getTipo());
+        }
+        
+        return colidindo;
     }
 
-        private void atualizarPontuacao() {
-        // RF08: Aumenta velocidade progressivamente
-        if (pontuacao > 0 && pontuacao % 100 == 0) {
-            velocidadeCenario += 0.5;
-            System.out.println("Velocidade aumentada para: " + velocidadeCenario);
+    private void tratarColisao(Obstacle obstaculo) {
+        // ✅ REMOVE o obstáculo com que colidiu
+        int index = obstaculos.indexOf(obstaculo);
+        if (index != -1) {
+            root.getChildren().remove(obstacleViews.get(index).getView());
+            obstaculos.remove(index);
+            obstacleViews.remove(index);
+        }
+        
+        // ✅ PERDE UMA VIDA
+        vidas--;
+        System.out.println("💔 Colisão! Vidas restantes: " + vidas);
+        
+        // ✅ VERIFICA FIM DE JOGO
+        if (vidas <= 0) {
+            gameOver();
+        } else {
+            System.out.println("🚗 Continue! Vidas: " + vidas);
         }
     }
 
     private void gameOver() {
-        gameLoop.stop();
-        System.out.println("🎮 GAME OVER! Pontuação final: " + pontuacao);
-        // Aqui você pode adicionar uma tela de game over depois
+        jogoAtivo = false; // ✅ PARA O JOGO sem parar o game loop
+        System.out.println("🎮 GAME OVER! Sem vidas restantes.");
+        
+        // O cenário continua se movendo, mas o jogador não pode mais jogar
+        // Você pode adicionar uma mensagem na tela depois
     }
-
 
     public void moverCarroEsquerda() {
         playerModel.moverEsquerda();
         playerView.setPosition(playerModel.getX(), playerModel.getY());
-        System.out.println("Posição X do carro: " + playerModel.getX());
     }
     
     public void moverCarroDireita() {
         playerModel.moverDireita();
         playerView.setPosition(playerModel.getX(), playerModel.getY());
-        System.out.println("Posição X do carro: " + playerModel.getX());
     }
     
     public Pane getRoot() { 
-        // ✅ Garante que o root sempre tenha foco quando retornado
         root.requestFocus();
         return root; 
     }
