@@ -9,10 +9,11 @@ public class ObstacleFactory {
         String[] tipos = {"ARBUSTO", "PEDESTRE_DIREITA", "SEMAFORO_FECHADO", "CONE", "SEMAFORO_ABERTO", "PEDESTRE_ESQUERDA"};
         String tipo = tipos[random.nextInt(tipos.length)];
         
-        
-        // Posições das faixas mais centralizadas na pista
-        double[] posicoesFaixas = {300, 450}; // Duas faixas mais próximas do centro
-        double posX = posicoesFaixas[random.nextInt(2)]; // Escolhe aleatoriamente uma faixa
+        double minX = 280;
+        double maxX = 500;
+        double posX = minX + random.nextDouble() * (maxX - minX);
+    
+   
         
         // Pequena variação aleatória reduzida para manter mais alinhado
         posX += (random.nextDouble() - 0.5) * 10; // Variação de ±5 pixels

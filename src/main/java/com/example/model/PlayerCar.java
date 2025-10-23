@@ -3,7 +3,7 @@ package com.example.model;
 public class PlayerCar {
     private double x;        // Posição horizontal
     private double y;        // Posição vertical 
-    private double velocidadeLateral = 20;  // Velocidade de movimento lateral
+    private double velocidadeLateral = 30;  // Velocidade de movimento lateral
     
     public PlayerCar(double startX, double startY) {
         this.x = startX;
