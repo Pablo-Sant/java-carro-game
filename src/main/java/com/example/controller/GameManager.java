@@ -35,7 +35,7 @@ public class GameManager {
     private Random random;
     private long ultimoObstaculoTime = 0;
     
-    private int vidas = 5;
+    private int vidas = 8;
     private boolean jogoAtivo = true;
     private double velocidadeBase = 4;
     private long inicioJogoTime = 0;
@@ -94,7 +94,7 @@ public class GameManager {
         startTimeNano = System.nanoTime();
         
         configurarControles();
-        System.out.println("🎮 Jogo iniciado! Vidas: " + vidas);
+        System.out.println("Jogo iniciado! Vidas: " + vidas);
         atualizarVidasUI();
     }
     
@@ -128,7 +128,7 @@ public class GameManager {
                     gerarObstaculos(now);
                     verificarColisoes();
                     atualizarTimer(now);
-                    verificarAumentoVelocidadePorTempo(now); // ✅ ADICIONADO
+                    verificarAumentoVelocidadePorTempo(now); 
                 }
             }
         };
