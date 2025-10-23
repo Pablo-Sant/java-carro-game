@@ -18,21 +18,21 @@ public class RoadView {
     }
     
     private void criarCenarioCompleto() {
-        // GRAMA NAS LATERAIS (Verde)
+        // Grama nas laterais 
         Rectangle gramaEsquerda = new Rectangle(0, 0, 150, 600);
         gramaEsquerda.setFill(Color.GREEN);
         
         Rectangle gramaDireita = new Rectangle(650, 0, 150, 600);
         gramaDireita.setFill(Color.GREEN);
         
-        // PISTA PRINCIPAL (Preta)
+        // Pista principal
         Rectangle pista = new Rectangle(150, 0, 500, 600);
         pista.setFill(Color.BLACK);
         
-        // FAIXAS BRANCAS CENTRAIS
+        // Faixas na pista
         criarFaixasDaPista();
         
-        // ACOSTAMENTOS (Cinza)
+        // Acostamentos
         Rectangle acostamentoEsquerdo = new Rectangle(140, 0, 10, 600);
         acostamentoEsquerdo.setFill(Color.GRAY);
         

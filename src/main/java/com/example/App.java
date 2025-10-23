@@ -11,11 +11,10 @@ public class App extends Application {
     @Override
     public void start(Stage stage) {
         try {
-            // Versão simplificada para testar a estrutura
             GameManager gameManager = new GameManager();
             Scene scene = new Scene(gameManager.getRoot(), 800, 600);
 
-            // ✅ CONFIGURAÇÃO EXTRA DE FOCO NA SCENE
+            
             scene.setOnMouseClicked(event -> {
                 gameManager.getRoot().requestFocus();
             });

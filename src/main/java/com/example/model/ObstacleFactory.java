@@ -26,7 +26,7 @@ public class ObstacleFactory {
             case "SEMAFORO_FECHADO":
                 return new Obstacle(posX, -100, 40, 100, velocidadeJogo, "SEMAFORO_FECHADO", "/images/semaforo_fechado.png");
             case "SEMAFORO_ABERTO":
-                return new Obstacle(posX, -100, 40, 100, velocidadeJogo, "SEMAFORO_ABERTO", "/images/semaforo_aberto.png");
+                return new Obstacle(posX, -100, 40, 100, velocidadeJogo, "SEMAFORO_ABERTO", "/images/semaforo_aberto .png");
             case "CONE":
                 return new Obstacle(posX, -100, 50, 70, velocidadeJogo, "CONE", "/images/cone.png");
             default:
