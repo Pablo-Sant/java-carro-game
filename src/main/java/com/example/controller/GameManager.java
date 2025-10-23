@@ -52,7 +52,7 @@ public class GameManager {
     
     private void initializeGame() {
         roadView = new RoadView();
-        playerModel = new PlayerCar(400, 500);
+        playerModel = new PlayerCar(375, 500); // Posição inicial mais centralizada
         playerView = new PlayerView();
         playerView.setPosition(playerModel.getX(), playerModel.getY());
 
@@ -128,13 +128,8 @@ public class GameManager {
     }
     
     private void animarCenario() {
-        List<Rectangle> faixas = roadView.getFaixas();
-        for (Rectangle faixa : faixas) {
-            faixa.setLayoutY(faixa.getLayoutY() + velocidadeCenario);
-            if (faixa.getLayoutY() > 600) {
-                faixa.setLayoutY(-30);
-            }
-        }
+        roadView.setVelocidade(velocidadeCenario);
+        roadView.atualizarCenario();
     }
 
     private void gerarObstaculos(long now) {
@@ -183,16 +178,28 @@ public class GameManager {
     private boolean colidiuComPlayer(Obstacle obstaculo) {
         double playerX = playerModel.getX();
         double playerY = playerModel.getY();
-        double playerWidth = 40;
-        double playerHeight = 70;
+        // Ajustando a hitbox para um tamanho menor e mais preciso
+        double playerWidth = 40 * 3; // largura base * escala reduzida
+        double playerHeight = 70 * 3; // altura base * escala reduzida
         
-        // ✅ COLISÃO MAIS PRECISA
-        boolean colidindo = playerX < obstaculo.getX() + obstaculo.getWidth() &&
-                           playerX + playerWidth > obstaculo.getX() &&
-                           playerY < obstaculo.getY() + obstaculo.getHeight() &&
-                           playerY + playerHeight > obstaculo.getY();
+        // Ajustando a área de colisão ainda mais assimétrica
+        double hitboxWidth = playerWidth * 0.5; // reduzindo a largura base
+        double hitboxHeight = playerHeight * 0.6;
         
-        // ✅ DEBUG (descomente se quiser ver as colisões)
+        // Aumentando o deslocamento para a esquerda (50% da largura)
+        double offsetX = hitboxWidth * 0.5;
+        
+        // Posicionando a hitbox com ainda mais área à esquerda e menos à direita
+        double hitboxX = playerX + (playerWidth - hitboxWidth) / 2 - offsetX;
+        double hitboxY = playerY + (playerHeight - hitboxHeight) / 2;
+        
+        // ✅ COLISÃO MAIS PRECISA COM HITBOX AJUSTADA
+        boolean colidindo = hitboxX < obstaculo.getX() + obstaculo.getWidth() &&
+                           hitboxX + hitboxWidth > obstaculo.getX() &&
+                           hitboxY < obstaculo.getY() + obstaculo.getHeight() &&
+                           hitboxY + hitboxHeight > obstaculo.getY();
+        
+        // ✅ DEBUG
         if (colidindo) {
             System.out.println("💥 Colisão detectada com: " + obstaculo.getTipo());
         }

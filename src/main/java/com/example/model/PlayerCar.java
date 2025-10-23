@@ -12,15 +12,19 @@ public class PlayerCar {
     
     public void moverEsquerda() {
         // Move para esquerda DIMINUINDO a posição X
-        if (x > 200) { // Limite esquerdo da pista
-            x -= velocidadeLateral;
+        double novaX = x - velocidadeLateral;
+        // Limite esquerdo mais estreito (200 + margem para o carro não encostar)
+        if (novaX >= 250) {
+            x = novaX;
         }
     }
     
     public void moverDireita() {
-        // Move para direita AUMENTANDO a posição X  
-        if (x < 600) { // Limite direito da pista
-            x += velocidadeLateral;
+        // Move para direita AUMENTANDO a posição X
+        double novaX = x + velocidadeLateral;
+        // Limite direito mais estreito (600 - largura do carro - margem)
+        if (novaX <= 500) {
+            x = novaX;
         }
     }
     
