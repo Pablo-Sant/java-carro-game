@@ -10,11 +10,12 @@ public class ObstacleFactory {
         String tipo = tipos[random.nextInt(tipos.length)];
         
         
-        double[] posicoesFaixas = {250, 450}; 
+        // Posições das faixas mais centralizadas na pista
+        double[] posicoesFaixas = {300, 450}; // Duas faixas mais próximas do centro
         double posX = posicoesFaixas[random.nextInt(2)]; // Escolhe aleatoriamente uma faixa
         
-        
-        posX -= 25; // Ajuste para centralizar
+        // Pequena variação aleatória reduzida para manter mais alinhado
+        posX += (random.nextDouble() - 0.5) * 10; // Variação de ±5 pixels
         
         switch (tipo) {
             case "ARBUSTO":

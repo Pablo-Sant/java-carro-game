@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.VBox?>
+<VBox alignment="CENTER" spacing="10.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.controller.MainMenuController">
+  <children>
+    <Label text="Jogo de Carro" style="-fx-font-size: 24px; -fx-text-fill: #ffffff;"/>
+    <Button fx:id="startButton" text="Iniciar" onAction="#onStart" />
+    <Button fx:id="scoresButton" text="Ver Top 10" onAction="#onShowScores" />
+    <Button fx:id="muteButton" text="Mutar / Desmutar" onAction="#onToggleMute" />
+    <ListView fx:id="scoresList" prefHeight="200.0" prefWidth="200.0" />
+  </children>
+  <padding>
+    <Insets top="40" bottom="40" left="40" right="40" />
+  </padding>
+  <style>
+    .root { -fx-background-color: linear-gradient(#2b2b2b, #000000); }
+  </style>
+</VBox>

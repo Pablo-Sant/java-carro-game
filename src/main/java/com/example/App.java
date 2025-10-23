@@ -3,34 +3,54 @@ package com.example;
 import com.example.controller.GameManager;
 
 import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import java.io.IOException;
 
 public class App extends Application {
+    private static Scene scene;
+    private static Stage mainStage;
 
     @Override
     public void start(Stage stage) {
         try {
-            GameManager gameManager = new GameManager();
-            Scene scene = new Scene(gameManager.getRoot(), 800, 600);
-
-            
-            scene.setOnMouseClicked(event -> {
-                gameManager.getRoot().requestFocus();
-            });
-            
-            stage.setTitle("Jogo de Carro - Desvie dos Obstáculos!");
+            mainStage = stage;
+            // Carrega o menu principal (FXML)
+            scene = new Scene(loadFXML("main_menu"), 800, 600);
+            stage.setTitle("Jogo de Carro - Menu");
             stage.setScene(scene);
             stage.show();
 
-            gameManager.getRoot().requestFocus();
-            
-            System.out.println("Jogo iniciado com sucesso!");
-            
+            System.out.println("Menu principal carregado com sucesso!");
+
         } catch (Exception e) {
-            System.err.println("Erro ao iniciar o jogo:");
+            System.err.println("Erro ao iniciar a aplicação:");
             e.printStackTrace();
         }
+    }
+
+    public static void setRoot(String fxml) throws IOException {
+        if ("primary".equals(fxml)) {
+            // Volta para o jogo (instancia nova partida)
+            GameManager gameManager = new GameManager();
+            scene.setRoot(gameManager.getRoot());
+            gameManager.getRoot().requestFocus();
+            mainStage.setTitle("Jogo de Carro - Em Jogo");
+        } else if ("main_menu".equals(fxml)) {
+            // Carrega o menu principal
+            scene.setRoot(loadFXML("main_menu"));
+            mainStage.setTitle("Jogo de Carro - Menu Principal");
+        } else {
+            // Carrega qualquer outro FXML
+            scene.setRoot(loadFXML(fxml));
+        }
+    }
+
+    private static Parent loadFXML(String fxml) throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
+        return fxmlLoader.load();
     }
 
     public static void main(String[] args) {
