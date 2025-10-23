@@ -265,14 +265,39 @@ private boolean colidiuComPlayer(Obstacle obstaculo) {
             obstacleViews.remove(index);
         }
         
-        vidas--;
-        System.out.println("Colisão! Vidas restantes: " + vidas);
+        
+        int dano = calcularDano(obstaculo.getTipo());
+        vidas -= dano;
+        
+        System.out.println("Colisão com " + obstaculo.getTipo() + "! Perdeu " + dano + " vida(s)");
+        System.out.println("Vidas restantes: " + vidas);
         atualizarVidasUI();
         
         if (vidas <= 0) {
             gameOver();
         } else {
             System.out.println("Continue! Vidas: " + vidas);
+        }
+    }
+
+    private int calcularDano(String tipoObstaculo) {
+        switch (tipoObstaculo) {
+            case "PEDESTRE_DIREITA":
+                return 3;
+            case "PEDESTRE_ESQUERDA":
+                return 3;
+            case "SEMAFORO_FECHADO":
+                return 2;
+            case "SEMAFORO_ABERTO":
+                return 1;  
+            case "BURACO":
+                return 2;  
+            case "CONE":
+                return 1;  
+            case "ARBUSTO":
+                return 1;  
+            default:
+                return 1;  
         }
     }
 
