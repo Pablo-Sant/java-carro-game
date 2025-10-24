@@ -7,15 +7,13 @@ import java.util.Random;
 public class ObstacleCreator {
     private  final Random random = new Random();
     
-    // ✅ FACTORY METHOD - delega a criação para as fábricas especializadas
     public Obstacle criarObstaculoAleatorio(double velocidadeJogo) {
         ObstacleFactory factory = escolherFactoryAleatoria();
         return factory.criarObstaculoAleatorio(velocidadeJogo);
     }
     
-    // ✅ MÉTODO QUE DEFINE QUAL FÁBRICA USAR (o coração do Factory Method)
     private ObstacleFactory escolherFactoryAleatoria() {
-        int escolha = random.nextInt(6); // 0 a 5
+        int escolha = random.nextInt(6);
         
         switch (escolha) {
             case 0:
@@ -31,11 +29,9 @@ public class ObstacleCreator {
             case 5:
                 return new ConeFactory();
             default:
-                return new ConeFactory(); // Fallback
+                return new ConeFactory();
         }
     }
-    
-    // ✅ SOBRECARGA para criar obstáculo específico (demonstra flexibilidade)
     public Obstacle criarObstaculoEspecifico(String tipo, double velocidadeJogo) {
         ObstacleFactory factory = criarFactoryPorTipo(tipo);
         return factory.criarObstaculoAleatorio(velocidadeJogo);

@@ -1,0 +1,75 @@
+.root {
+    -fx-background-image: url('/images/harddash.png');
+    -fx-background-size: cover;
+    -fx-background-position: center;
+}
+
+.menu-box {
+    -fx-background-color: rgba(0, 0, 0, 0.8);
+    -fx-background-radius: 30;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 15, 0, 0, 0);
+    -fx-padding: 20;
+    -fx-spacing: 15;
+}
+
+.title {
+    -fx-font-size: 64px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ff0000;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 0);
+    -fx-font-family: "Impact";
+}
+
+.menu-button {
+    -fx-font-size: 24px;
+    -fx-min-width: 300;
+    -fx-min-height: 60;
+    -fx-background-radius: 30;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 5, 0, 0, 0);
+    -fx-cursor: hand;
+}
+
+.menu-button:hover {
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+    -fx-effect: dropshadow(three-pass-box, rgba(255,255,255,0.2), 10, 0, 0, 0);
+}
+
+.start-button {
+    -fx-background-color: linear-gradient(to bottom right, #ff3019, #cf0404);
+    -fx-font-size: 28px;
+}
+
+.scores-button {
+    -fx-background-color: linear-gradient(to bottom right, #1e3c72, #2a5298);
+    -fx-min-width: 250;
+    -fx-min-height: 50;
+    -fx-font-size: 20px;
+}
+
+.mute-button {
+    -fx-background-color: linear-gradient(to bottom right, #232526, #414345);
+    -fx-min-width: 200;
+    -fx-min-height: 50;
+    -fx-font-size: 20px;
+}
+
+.scores-list {
+    -fx-background-color: rgba(0, 0, 0, 0.9);
+    -fx-background-radius: 15;
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+}
+
+.scores-list .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 5 10 5 10;
+}
+
+.scores-list .list-cell:odd {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+}

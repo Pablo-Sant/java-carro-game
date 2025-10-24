@@ -10,7 +10,6 @@ public class ObstacleView {
     
     public ObstacleView(Obstacle obstacle) {
         try {
-            // Carrega a imagem do resources
             Image image = new Image(getClass().getResourceAsStream(obstacle.getImagePath()));
             imageView = new ImageView(image);
             imageView.setFitWidth(obstacle.getWidth());
@@ -21,7 +20,7 @@ public class ObstacleView {
         } catch (Exception e) {
             System.err.println("Erro ao carregar imagem: " + obstacle.getImagePath());
             e.printStackTrace();
-            // Fallback: retângulo colorido se imagem não carregar
+            
             imageView = new ImageView();
             imageView.setFitWidth(obstacle.getWidth());
             imageView.setFitHeight(obstacle.getHeight());

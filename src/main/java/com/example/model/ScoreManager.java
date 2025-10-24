@@ -16,9 +16,8 @@ public class ScoreManager {
     public static synchronized void addTime(long seconds) {
         List<Long> times = readTimes();
         times.add(seconds);
-        // ordena decrescente (maior tempo primeiro)
         Collections.sort(times, Collections.reverseOrder());
-        // mantém só top 10
+        
         if (times.size() > 10) times = new ArrayList<>(times.subList(0, 10));
         writeTimes(times);
     }
@@ -35,7 +34,7 @@ public class ScoreManager {
                 try {
                     times.add(Long.parseLong(line));
                 } catch (NumberFormatException e) {
-                    // ignora linhas inválidas
+                    
                 }
             }
         } catch (IOException e) {

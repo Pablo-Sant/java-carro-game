@@ -18,7 +18,6 @@ public class Obstacle {
         this.imagePath = imagePath;
     }
     
-    // Getters
     public String getImagePath() { return imagePath; }
     public double getX() { return x; }
     public double getY() { return y; }

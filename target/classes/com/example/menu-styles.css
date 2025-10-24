@@ -1,0 +1,12 @@
+.menu-background {
+    -fx-background-image: url("../images/harddash.png");
+    -fx-background-size: cover;
+    -fx-background-position: center;
+    -fx-background-repeat: no-repeat;
+}
+
+.menu-box {
+    -fx-background-color: rgba(0, 0, 0, 0.7);
+    -fx-padding: 20;
+    -fx-background-radius: 10;
+}

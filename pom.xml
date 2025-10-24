@@ -27,6 +27,11 @@
             <artifactId>javafx-graphics</artifactId>
             <version>${javafx.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-media</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -46,7 +51,7 @@
                     <mainClass>${main.class}</mainClass>
                     <options>
                         <option>--add-modules</option>
-                        <option>javafx.controls,javafx.fxml</option>
+                        <option>javafx.controls,javafx.fxml,javafx.media</option>
                         <option>--add-exports</option>
                         <option>javafx.graphics/com.sun.javafx.sg.prism=ALL-UNNAMED</option>
                     </options>

@@ -17,7 +17,6 @@ public class App extends Application {
     public void start(Stage stage) {
         try {
             mainStage = stage;
-            // Carrega o menu principal (FXML)
             scene = new Scene(loadFXML("main_menu"), 800, 600);
             stage.setTitle("Jogo de Carro - Menu");
             stage.setScene(scene);
@@ -33,17 +32,14 @@ public class App extends Application {
 
     public static void setRoot(String fxml) throws IOException {
         if ("primary".equals(fxml)) {
-            // Volta para o jogo (instancia nova partida)
             GameManager gameManager = new GameManager();
             scene.setRoot(gameManager.getRoot());
             gameManager.getRoot().requestFocus();
             mainStage.setTitle("Jogo de Carro - Em Jogo");
         } else if ("main_menu".equals(fxml)) {
-            // Carrega o menu principal
             scene.setRoot(loadFXML("main_menu"));
             mainStage.setTitle("Jogo de Carro - Menu Principal");
         } else {
-            // Carrega qualquer outro FXML
             scene.setRoot(loadFXML(fxml));
         }
     }

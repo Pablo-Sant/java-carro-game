@@ -13,7 +13,14 @@ import com.example.view.ObstacleView;
 import com.example.view.PlayerView;
 import com.example.view.RoadView;
 
+import javafx.animation.Animation;
 import javafx.animation.AnimationTimer;
+import javafx.animation.ScaleTransition;
+import javafx.animation.Timeline;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.util.Duration;
+import javafx.scene.effect.DropShadow;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -50,6 +57,9 @@ public class GameManager {
     private Button reiniciarButton;
     private Label timerLabel;
     private long startTimeNano = 0;
+    private ScaleTransition vidasPulse;
+    private ScaleTransition timerPulse;
+    private Timeline timerColorTimeline;
     
     public GameManager() {
         root = new Pane();
@@ -74,23 +84,53 @@ public class GameManager {
         root.getChildren().add(roadView.getRoot());
         root.getChildren().add(playerView.getView());
         
-        // Label de vidas no canto superior esquerdo
-        vidasLabel = new Label("Vidas: " + vidas);
-        vidasLabel.setFont(new Font(18));
-        vidasLabel.setStyle("-fx-text-fill: white; -fx-font-weight: bold;");
-        vidasLabel.setLayoutX(10);
-        vidasLabel.setLayoutY(10);
-        root.getChildren().add(vidasLabel);
+    vidasLabel = new Label("Vidas: " + vidas);
+    vidasLabel.setFont(new Font("Arial Black", 28));
+    vidasLabel.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-effect: dropshadow(gaussian, rgba(255,0,0,0.9), 8, 0.5, 0, 0);");
+    vidasLabel.setLayoutX(10);
+    vidasLabel.setLayoutY(10);
+    DropShadow ds = new DropShadow();
+    ds.setRadius(8);
+    ds.setOffsetX(0);
+    ds.setOffsetY(0);
+    ds.setColor(Color.rgb(255, 60, 60, 0.9));
+    vidasLabel.setEffect(ds);
+    root.getChildren().add(vidasLabel);
+    vidasPulse = new ScaleTransition(Duration.millis(800), vidasLabel);
+    vidasPulse.setFromX(1.0);
+    vidasPulse.setFromY(1.0);
+    vidasPulse.setToX(1.12);
+    vidasPulse.setToY(1.12);
+    vidasPulse.setAutoReverse(true);
+    vidasPulse.setCycleCount(Animation.INDEFINITE);
+    vidasPulse.play();
         
-        // Label do timer no canto superior direito
-        timerLabel = new Label("00:00");
-        timerLabel.setFont(new Font(18));
-        timerLabel.setStyle("-fx-text-fill: white; -fx-font-weight: bold;");
-        timerLabel.setLayoutY(10);
-        timerLabel.layoutXProperty().bind(root.widthProperty().subtract(70));
-        root.getChildren().add(timerLabel);
+    timerLabel = new Label("00:00");
+    timerLabel.setFont(new Font("Arial Black", 28));
+    timerLabel.setStyle("-fx-text-fill: white; -fx-font-weight: bold;");
+    timerLabel.setLayoutY(10);
+    timerLabel.layoutXProperty().bind(root.widthProperty().subtract(120));
+    DropShadow tds = new DropShadow();
+    tds.setRadius(6);
+    tds.setColor(Color.rgb(240, 200, 30, 0.9));
+    timerLabel.setEffect(tds);
+    root.getChildren().add(timerLabel);
+    timerPulse = new ScaleTransition(Duration.millis(700), timerLabel);
+    timerPulse.setFromX(1.0);
+    timerPulse.setFromY(1.0);
+    timerPulse.setToX(1.10);
+    timerPulse.setToY(1.10);
+    timerPulse.setAutoReverse(true);
+    timerPulse.setCycleCount(Animation.INDEFINITE);
+    timerPulse.play();
+    timerColorTimeline = new Timeline(
+        new KeyFrame(Duration.ZERO, new KeyValue(timerLabel.textFillProperty(), Color.WHITE)),
+        new KeyFrame(Duration.millis(700), new KeyValue(timerLabel.textFillProperty(), Color.rgb(255, 220, 60)))
+    );
+    timerColorTimeline.setAutoReverse(true);
+    timerColorTimeline.setCycleCount(Timeline.INDEFINITE);
+    timerColorTimeline.play();
         
-        // iniciar contador
         startTimeNano = System.nanoTime();
         
         configurarControles();
@@ -145,7 +185,6 @@ public class GameManager {
     }
     
     private void animarCenario() {
-        // ✅ MODIFICADO: Usa velocidadeAtual em vez de valor fixo
         roadView.setVelocidade(velocidadeAtual);
         roadView.atualizarCenario();
     }
@@ -161,11 +200,9 @@ public class GameManager {
 
 private void criarNovoObstaculo() {
     
-        //  CORREÇÃO: Criar instância de ObstacleCreator
         ObstacleCreator creator = new ObstacleCreator();
         Obstacle obstaculo = creator.criarObstaculoAleatorio(velocidadeAtual);
         
-        // Verificação de distância
         double distanciaVertical = Math.abs(obstaculo.getY() - playerModel.getY());
         if (distanciaVertical < 100) {
             obstaculo = creator.criarObstaculoAleatorio(velocidadeAtual);
@@ -236,7 +273,6 @@ private boolean colidiuComPlayer(Obstacle obstaculo) {
     double obstacleWidth = obstaculo.getWidth();
     double obstacleHeight = obstaculo.getHeight();
     
-    //  COLISÃO SIMPLES E PRECISA
     boolean colisaoHorizontal = playerX < obstacleX + obstacleWidth && 
                                playerX + playerWidth > obstacleX;
     
@@ -245,7 +281,6 @@ private boolean colidiuComPlayer(Obstacle obstaculo) {
     
     boolean colidindo = colisaoHorizontal && colisaoVertical;
     
-    //  DEBUG MELHORADO - COM NOME DO OBSTÁCULO
     if (colidindo) {
         System.out.println("💥 COLISÃO REAL DETECTADA:");
         System.out.println("   Carro:     X=" + playerX + " Y=" + playerY + " W=" + playerWidth + " H=" + playerHeight);
@@ -253,7 +288,6 @@ private boolean colidiuComPlayer(Obstacle obstaculo) {
         System.out.println("   Sobreposição X: " + colisaoHorizontal);
         System.out.println("   Sobreposição Y: " + colisaoVertical);
         
-        //  CALCULA A SOBREPOSIÇÃO REAL
         double overlapX = Math.min(playerX + playerWidth, obstacleX + obstacleWidth) - Math.max(playerX, obstacleX);
         double overlapY = Math.min(playerY + playerHeight, obstacleY + obstacleHeight) - Math.max(playerY, obstacleY);
         System.out.println("   Sobreposição real: X=" + String.format("%.1f", overlapX) + "px, Y=" + String.format("%.1f", overlapY) + "px");
@@ -388,6 +422,19 @@ private boolean colidiuComPlayer(Obstacle obstaculo) {
             }
             root.getChildren().removeAll(toRemove);
             gameOverBox = null;
+        }
+
+        if (vidasPulse != null) {
+            vidasPulse.stop();
+            vidasPulse = null;
+        }
+        if (timerPulse != null) {
+            timerPulse.stop();
+            timerPulse = null;
+        }
+        if (timerColorTimeline != null) {
+            timerColorTimeline.stop();
+            timerColorTimeline = null;
         }
 
         for (ObstacleView ov : obstacleViews) {

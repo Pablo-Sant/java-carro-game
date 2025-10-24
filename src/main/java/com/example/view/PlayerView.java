@@ -12,13 +12,12 @@ public class PlayerView {
     carroView.setFitWidth(40);
     carroView.setFitHeight(70);
     carroView.setPreserveRatio(true);
-    // gira o carro 90 graus e aumenta o tamanho em 5x
     carroView.setRotate(90);
     carroView.setScaleX(5);
     carroView.setScaleY(5);
     carroView.setSmooth(true);
 
-        // tenta carregar a imagem do recurso; se falhar, deixa o ImageView vazio
+        
         try (InputStream is = getClass().getResourceAsStream("/images/carro.png")) {
             if (is != null) {
                 Image img = new Image(is);
