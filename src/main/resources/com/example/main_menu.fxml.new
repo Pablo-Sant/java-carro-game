@@ -9,7 +9,6 @@
            fx:controller="com.example.controller.MainMenuController"
            style="-fx-background-image: url('/images/harddash.png'); -fx-background-size: cover; -fx-background-position: center center;">
     
-    <!-- Menu Controls with semi-transparent background -->
     <VBox alignment="CENTER" spacing="15.0" maxWidth="400">
         <padding>
             <Insets top="40" bottom="40" left="40" right="40"/>

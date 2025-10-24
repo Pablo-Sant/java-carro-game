@@ -1,8 +1,8 @@
 module com.example {
-    requires javafx.controls;
-    requires javafx.fxml;
-    requires javafx.graphics;
-    requires javafx.media;
+    requires transitive javafx.controls;
+    requires transitive javafx.fxml;
+    requires transitive javafx.graphics;
+    requires transitive javafx.media;
     requires java.base;
     
     opens com.example to javafx.fxml;

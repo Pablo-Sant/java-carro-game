@@ -1,19 +1,37 @@
 package com.example.controller;
 
-import com.example.model.*;
-import com.example.view.*;
-import javafx.animation.*;
-import javafx.scene.control.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import com.example.model.Obstacle;
+import com.example.model.GameEvent;
+import com.example.model.GameEventPublisher;
+import com.example.model.ObstacleCreator;
+import com.example.model.PlayerCar;
+import com.example.model.ScoreManager;
+import com.example.view.ObstacleView;
+import com.example.view.PlayerView;
+import com.example.view.RoadView;
+
+import javafx.animation.Animation;
+import javafx.animation.AnimationTimer;
+import javafx.animation.ScaleTransition;
+import javafx.animation.Timeline;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.util.Duration;
 import javafx.scene.effect.DropShadow;
-import javafx.scene.layout.*;
+import javafx.geometry.Pos;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.input.KeyCode;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
-import javafx.util.Duration;
-import javafx.geometry.Pos;
-import javafx.scene.input.KeyCode;
-import java.io.IOException;
-import java.util.*;
 
 public class GameManager implements GameObserver {
     private Pane root;
@@ -32,6 +50,8 @@ public class GameManager implements GameObserver {
     private long ultimoAumentoTime = 0;
     private double velocidadeAtual;
     
+    private final long INTERVALO_AUMENTO = 3_000_000_000L;
+    
     private Label vidasLabel;
     private VBox gameOverBox;
     private Button reiniciarButton;
@@ -40,40 +60,17 @@ public class GameManager implements GameObserver {
     private ScaleTransition vidasPulse;
     private ScaleTransition timerPulse;
     private Timeline timerColorTimeline;
-    
-    private final long INTERVALO_AUMENTO = 3_000_000_000L;
+    private GameEventPublisher eventPublisher;
     
     public GameManager() {
         root = new Pane();
         gameModel = new GameModel();
-        gameModel.addObserver(this);
         initializeGame();
         setupGameLoop();
     }
 
-    @Override
-    public void onGameEvent(GameEvent.Type type, Object data) {
-        switch (type) {
-            case LIVES_CHANGED:
-                int vidas = (Integer) data;
-                if (vidasLabel != null) {
-                    vidasLabel.setText("Vidas: " + vidas);
-                }
-                break;
-            case SCORE_CHANGED:
-                int pontuacao = (Integer) data;
-                System.out.println("⭐ Pontuação: " + pontuacao);
-                break;
-            case TIMER_UPDATED:
-                String tempo = (String) data;
-                if (timerLabel != null) {
-                    timerLabel.setText(tempo);
-                }
-                break;
-            case GAME_OVER:
-                showGameOverScreen();
-                break;
-        }
+    public GameEventPublisher getEventPublisher() {
+        return eventPublisher;
     }
     
     private void initializeGame() {
@@ -93,79 +90,63 @@ public class GameManager implements GameObserver {
         root.getChildren().add(roadView.getRoot());
         root.getChildren().add(playerView.getView());
         
-        setupUI();
-        configurarControles();
-    }
-
-    private void setupUI() {
-        vidasLabel = new Label("Vidas: " + gameModel.getVidas());
-        vidasLabel.setFont(new Font("Arial Black", 28));
-        vidasLabel.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-effect: dropshadow(gaussian, rgba(255,0,0,0.9), 8, 0.5, 0, 0);");
-        vidasLabel.setLayoutX(10);
-        vidasLabel.setLayoutY(10);
+    vidasLabel = new Label("Vidas: " + vidas);
+    vidasLabel.setFont(new Font("Arial Black", 28));
+    vidasLabel.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-effect: dropshadow(gaussian, rgba(255,0,0,0.9), 8, 0.5, 0, 0);");
+    vidasLabel.setLayoutX(10);
+    vidasLabel.setLayoutY(10);
+    DropShadow ds = new DropShadow();
+    ds.setRadius(8);
+    ds.setOffsetX(0);
+    ds.setOffsetY(0);
+    ds.setColor(Color.rgb(255, 60, 60, 0.9));
+    vidasLabel.setEffect(ds);
+    root.getChildren().add(vidasLabel);
+    vidasPulse = new ScaleTransition(Duration.millis(800), vidasLabel);
+    vidasPulse.setFromX(1.0);
+    vidasPulse.setFromY(1.0);
+    vidasPulse.setToX(1.12);
+    vidasPulse.setToY(1.12);
+    vidasPulse.setAutoReverse(true);
+    vidasPulse.setCycleCount(Animation.INDEFINITE);
+    vidasPulse.play();
         
-        DropShadow ds = new DropShadow();
-        ds.setRadius(8);
-        ds.setOffsetX(0);
-        ds.setOffsetY(0);
-        ds.setColor(Color.rgb(255, 60, 60, 0.9));
-        vidasLabel.setEffect(ds);
-        root.getChildren().add(vidasLabel);
+    timerLabel = new Label("00:00");
+    timerLabel.setFont(new Font("Arial Black", 28));
+    timerLabel.setStyle("-fx-text-fill: white; -fx-font-weight: bold;");
+    timerLabel.setLayoutY(10);
+    timerLabel.layoutXProperty().bind(root.widthProperty().subtract(120));
+    DropShadow tds = new DropShadow();
+    tds.setRadius(6);
+    tds.setColor(Color.rgb(240, 200, 30, 0.9));
+    timerLabel.setEffect(tds);
+    root.getChildren().add(timerLabel);
+    timerPulse = new ScaleTransition(Duration.millis(700), timerLabel);
+    timerPulse.setFromX(1.0);
+    timerPulse.setFromY(1.0);
+    timerPulse.setToX(1.10);
+    timerPulse.setToY(1.10);
+    timerPulse.setAutoReverse(true);
+    timerPulse.setCycleCount(Animation.INDEFINITE);
+    timerPulse.play();
+    timerColorTimeline = new Timeline(
+        new KeyFrame(Duration.ZERO, new KeyValue(timerLabel.textFillProperty(), Color.WHITE)),
+        new KeyFrame(Duration.millis(700), new KeyValue(timerLabel.textFillProperty(), Color.rgb(255, 220, 60)))
+    );
+    timerColorTimeline.setAutoReverse(true);
+    timerColorTimeline.setCycleCount(Timeline.INDEFINITE);
+    timerColorTimeline.play();
         
-        setupVidasPulse();
-        setupTimer();
-    }
-
-    private void setupVidasPulse() {
-        vidasPulse = new ScaleTransition(Duration.millis(800), vidasLabel);
-        vidasPulse.setFromX(1.0);
-        vidasPulse.setFromY(1.0);
-        vidasPulse.setToX(1.12);
-        vidasPulse.setToY(1.12);
-        vidasPulse.setAutoReverse(true);
-        vidasPulse.setCycleCount(Animation.INDEFINITE);
-        vidasPulse.play();
-    }
-
-    private void setupTimer() {
-        timerLabel = new Label("00:00");
-        timerLabel.setFont(new Font("Arial Black", 28));
-        timerLabel.setStyle("-fx-text-fill: white; -fx-font-weight: bold;");
-        timerLabel.setLayoutY(10);
-        timerLabel.layoutXProperty().bind(root.widthProperty().subtract(120));
-        
-        DropShadow tds = new DropShadow();
-        tds.setRadius(6);
-        tds.setColor(Color.rgb(240, 200, 30, 0.9));
-        timerLabel.setEffect(tds);
-        root.getChildren().add(timerLabel);
-        
-        setupTimerAnimations();
         startTimeNano = System.nanoTime();
-    }
-
-    private void setupTimerAnimations() {
-        timerPulse = new ScaleTransition(Duration.millis(700), timerLabel);
-        timerPulse.setFromX(1.0);
-        timerPulse.setFromY(1.0);
-        timerPulse.setToX(1.10);
-        timerPulse.setToY(1.10);
-        timerPulse.setAutoReverse(true);
-        timerPulse.setCycleCount(Animation.INDEFINITE);
-        timerPulse.play();
-
-        timerColorTimeline = new Timeline(
-            new KeyFrame(Duration.ZERO, new KeyValue(timerLabel.textFillProperty(), Color.WHITE)),
-            new KeyFrame(Duration.millis(700), new KeyValue(timerLabel.textFillProperty(), Color.rgb(255, 220, 60)))
-        );
-        timerColorTimeline.setAutoReverse(true);
-        timerColorTimeline.setCycleCount(Timeline.INDEFINITE);
-        timerColorTimeline.play();
+        
+        configurarControles();
+        System.out.println("Jogo iniciado! Vidas: " + vidas);
+        atualizarVidasUI();
     }
     
     private void configurarControles() {
         root.setOnKeyPressed(event -> {
-            if (!gameModel.isJogoAtivo()) return;
+            if (!jogoAtivo) return;
             
             if (event.getCode() == KeyCode.LEFT) {
                 moverCarroEsquerda();
@@ -187,7 +168,7 @@ public class GameManager implements GameObserver {
                     ultimoAumentoTime = now;
                 }
 
-                if (gameModel.isJogoAtivo()) {
+                if (jogoAtivo) {
                     animarCenario();
                     atualizarObstaculos();
                     gerarObstaculos(now);
@@ -201,10 +182,15 @@ public class GameManager implements GameObserver {
     }
 
     private void atualizarTimer(long now) {
-        if (startTimeNano == 0) return;
+        if (timerLabel == null || startTimeNano == 0) return;
         long elapsedNanos = now - startTimeNano;
         long totalSeconds = elapsedNanos / 1_000_000_000L;
-        gameModel.atualizarTempo(totalSeconds);
+        long minutes = totalSeconds / 60;
+        long seconds = totalSeconds % 60;
+        timerLabel.setText(String.format("%d:%02d", minutes, seconds));
+        if (eventPublisher != null) {
+            eventPublisher.notify(com.example.model.GameEvent.Type.TIMER_UPDATED, timerLabel.getText());
+        }
     }
     
     private void animarCenario() {
@@ -221,7 +207,8 @@ public class GameManager implements GameObserver {
         }
     }
 
-    private void criarNovoObstaculo() {
+private void criarNovoObstaculo() {
+    
         ObstacleCreator creator = new ObstacleCreator();
         Obstacle obstaculo = creator.criarObstaculoAleatorio(velocidadeAtual);
         
@@ -234,7 +221,11 @@ public class GameManager implements GameObserver {
         obstaculos.add(obstaculo);
         obstacleViews.add(obstacleView);
         root.getChildren().add(obstacleView.getView());
+        
+        System.out.println("✅ Obstáculo criado via Factory Method: " + obstaculo.getTipo());
+        
     }
+
 
     private void atualizarObstaculos() {
         for (int i = obstaculos.size() - 1; i >= 0; i--) {
@@ -244,11 +235,16 @@ public class GameManager implements GameObserver {
             obstaculo.update();
             obstacleView.updatePosition(obstaculo.getX(), obstaculo.getY());
             
-            if (obstaculo.isForaDaTela()) {
+                if (obstaculo.isForaDaTela()) {
                 root.getChildren().remove(obstacleView.getView());
                 obstaculos.remove(i);
                 obstacleViews.remove(i);
-                gameModel.incrementarPontuacao(10);
+                
+                pontuacao += 10;
+                System.out.println("⭐ Pontuação: " + pontuacao);
+                if (eventPublisher != null) {
+                    eventPublisher.notify(com.example.model.GameEvent.Type.SCORE_CHANGED, pontuacao);
+                }
             }
         }
     }
@@ -257,13 +253,16 @@ public class GameManager implements GameObserver {
         if (now - ultimoAumentoTime >= INTERVALO_AUMENTO) {
             aumentarVelocidade();
             ultimoAumentoTime = now;
+
+            long tempoDecorrido = (now - inicioJogoTime) / 1_000_000_000;
+            System.out.println("⏰ Tempo decorrido: " + tempoDecorrido + "s");
+            System.out.println("🚀 VELOCIDADE AUMENTADA: " + String.format("%.1f", velocidadeAtual));
         }
     }
 
     private void aumentarVelocidade() {
         double aumento = 0.8;
         velocidadeAtual += aumento;
-        gameModel.aumentarDificuldade();
     }
 
     private void verificarColisoes() {
@@ -275,25 +274,40 @@ public class GameManager implements GameObserver {
         }
     }
 
-    private boolean colidiuComPlayer(Obstacle obstaculo) {
-        double playerX = playerModel.getX();
-        double playerY = playerModel.getY();
-        double playerWidth = 40;
-        double playerHeight = 70;
-        
-        double obstacleX = obstaculo.getX();
-        double obstacleY = obstaculo.getY();
-        double obstacleWidth = obstaculo.getWidth();
-        double obstacleHeight = obstaculo.getHeight();
-        
-        boolean colisaoHorizontal = playerX < obstacleX + obstacleWidth && 
+private boolean colidiuComPlayer(Obstacle obstaculo) {
+    double playerX = playerModel.getX();
+    double playerY = playerModel.getY();
+    double playerWidth = 40;
+    double playerHeight = 70;
+    
+    double obstacleX = obstaculo.getX();
+    double obstacleY = obstaculo.getY();
+    double obstacleWidth = obstaculo.getWidth();
+    double obstacleHeight = obstaculo.getHeight();
+    
+    boolean colisaoHorizontal = playerX < obstacleX + obstacleWidth && 
                                playerX + playerWidth > obstacleX;
-        
-        boolean colisaoVertical = playerY < obstacleY + obstacleHeight && 
+    
+    boolean colisaoVertical = playerY < obstacleY + obstacleHeight && 
                              playerY + playerHeight > obstacleY;
+    
+    boolean colidindo = colisaoHorizontal && colisaoVertical;
+    
+    if (colidindo) {
+        System.out.println("💥 COLISÃO REAL DETECTADA:");
+        System.out.println("   Carro:     X=" + playerX + " Y=" + playerY + " W=" + playerWidth + " H=" + playerHeight);
+        System.out.println("   Obstáculo: " + obstaculo.getTipo() + " | X=" + obstacleX + " Y=" + obstacleY + " W=" + obstacleWidth + " H=" + obstacleHeight);
+        System.out.println("   Sobreposição X: " + colisaoHorizontal);
+        System.out.println("   Sobreposição Y: " + colisaoVertical);
         
-        return colisaoHorizontal && colisaoVertical;
+        double overlapX = Math.min(playerX + playerWidth, obstacleX + obstacleWidth) - Math.max(playerX, obstacleX);
+        double overlapY = Math.min(playerY + playerHeight, obstacleY + obstacleHeight) - Math.max(playerY, obstacleY);
+        System.out.println("   Sobreposição real: X=" + String.format("%.1f", overlapX) + "px, Y=" + String.format("%.1f", overlapY) + "px");
+        System.out.println("Tipo do obstáculo: " + obstaculo.getTipo());
     }
+    
+    return colidindo;
+}
 
     private void tratarColisao(Obstacle obstaculo) {
         int index = obstaculos.indexOf(obstaculo);
@@ -303,13 +317,28 @@ public class GameManager implements GameObserver {
             obstacleViews.remove(index);
         }
         
+        
         int dano = calcularDano(obstaculo.getTipo());
-        gameModel.diminuirVidas(dano);
+        vidas -= dano;
+        
+        System.out.println("Colisão com " + obstaculo.getTipo() + "! Perdeu " + dano + " vida(s)");
+        System.out.println("Vidas restantes: " + vidas);
+        atualizarVidasUI();
+            if (eventPublisher != null) {
+                eventPublisher.notify(com.example.model.GameEvent.Type.LIVES_CHANGED, vidas);
+            }
+        
+        if (vidas <= 0) {
+            gameOver();
+        } else {
+            System.out.println("Continue! Vidas: " + vidas);
+        }
     }
 
     private int calcularDano(String tipoObstaculo) {
         switch (tipoObstaculo) {
             case "PEDESTRE_DIREITA":
+                return 3;
             case "PEDESTRE_ESQUERDA":
                 return 3;
             case "SEMAFORO_FECHADO":
@@ -319,6 +348,7 @@ public class GameManager implements GameObserver {
             case "BURACO":
                 return 2;  
             case "CONE":
+                return 1;  
             case "ARBUSTO":
                 return 1;  
             default:
@@ -326,11 +356,36 @@ public class GameManager implements GameObserver {
         }
     }
 
-    private void showGameOverScreen() {
-        if (gameLoop != null) {
-            gameLoop.stop();
+    private void gameOver() {
+        jogoAtivo = false;
+        System.out.println("GAME OVER! Sem vidas restantes.");
+        
+        if (vidasLabel != null) {
+            vidasLabel.setText("GAME OVER");
         }
 
+        if (timerLabel != null && startTimeNano != 0) {
+            long elapsedNanos = System.nanoTime() - startTimeNano;
+            long totalSeconds = elapsedNanos / 1_000_000_000L;
+            long minutes = totalSeconds / 60;
+            long seconds = totalSeconds % 60;
+            timerLabel.setText(String.format("%d:%02d", minutes, seconds));
+                if (eventPublisher != null) {
+                    eventPublisher.notify(com.example.model.GameEvent.Type.GAME_OVER, totalSeconds);
+                }
+                ScoreManager.addTime(totalSeconds);
+        }
+        
+        showGameOverScreen();
+    }
+
+    private void atualizarVidasUI() {
+        if (vidasLabel != null) {
+            vidasLabel.setText("Vidas: " + vidas);
+        }
+    }
+
+    private void showGameOverScreen() {
         if (gameOverBox != null) return;
 
         Rectangle overlay = new Rectangle();
@@ -350,6 +405,9 @@ public class GameManager implements GameObserver {
         menuButton.setStyle("-fx-font-size: 18; -fx-padding: 10 20;");
         menuButton.setOnAction(e -> {
             try {
+                if (gameLoop != null) {
+                    gameLoop.stop();
+                }
                 limparJogo();
                 com.example.App.setRoot("main_menu");
             } catch (IOException ex) {
@@ -363,9 +421,8 @@ public class GameManager implements GameObserver {
         gameOverBox.layoutXProperty().bind(root.widthProperty().subtract(gameOverBox.widthProperty()).divide(2));
         gameOverBox.layoutYProperty().bind(root.heightProperty().subtract(gameOverBox.heightProperty()).divide(2));
 
-        root.getChildren().addAll(overlay, gameOverBox);
-        
-        ScoreManager.addTime(gameModel.getTempoJogo());
+        root.getChildren().add(overlay);
+        root.getChildren().add(gameOverBox);
     }
 
     private void limparJogo() {
@@ -404,6 +461,9 @@ public class GameManager implements GameObserver {
         obstacleViews.clear();
         obstaculos.clear();
 
+        vidas = 5;
+        ultimoObstaculoTime = 0;
+        jogoAtivo = false;
         startTimeNano = 0;
     }
 

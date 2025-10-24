@@ -1,5 +1,5 @@
 package com.example.model;
 
-public class GameObserver {
-    
+public interface GameObserver {
+    void onGameEvent(GameEvent.Type type, Object data);
 }

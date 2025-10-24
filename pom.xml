@@ -7,8 +7,8 @@
     <name>JavaFX Car Game</name>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.release>11</maven.compiler.release>
-        <javafx.version>11.0.2</javafx.version>
+        <maven.compiler.release>17</maven.compiler.release>
+        <javafx.version>17.0.8</javafx.version>
         <main.class>com.example.App</main.class>
     </properties>
     <dependencies>
