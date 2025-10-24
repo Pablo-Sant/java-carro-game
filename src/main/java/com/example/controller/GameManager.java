@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Random;
 
 import com.example.model.Obstacle;
-import com.example.model.ObstacleFactory;
+import com.example.model.ObstacleCreator;
 import com.example.model.PlayerCar;
 import com.example.model.ScoreManager;
 import com.example.view.ObstacleView;
@@ -159,21 +159,27 @@ public class GameManager {
         }
     }
 
-    private void criarNovoObstaculo() {
-        Obstacle obstaculo = ObstacleFactory.criarObstaculoAleatorio(velocidadeAtual);
-
-        double distanciaVertical = Math.abs(obstaculo.getY() - playerModel.getY());
-            if (distanciaVertical < 100) { // Se nascer muito perto, reposiciona
-            obstaculo = ObstacleFactory.criarObstaculoAleatorio(velocidadeAtual);
-        }
-
-   
-        ObstacleView obstacleView = new ObstacleView(obstaculo);
+private void criarNovoObstaculo() {
     
+        //  CORREÇÃO: Criar instância de ObstacleCreator
+        ObstacleCreator creator = new ObstacleCreator();
+        Obstacle obstaculo = creator.criarObstaculoAleatorio(velocidadeAtual);
+        
+        // Verificação de distância
+        double distanciaVertical = Math.abs(obstaculo.getY() - playerModel.getY());
+        if (distanciaVertical < 100) {
+            obstaculo = creator.criarObstaculoAleatorio(velocidadeAtual);
+        }
+        
+        ObstacleView obstacleView = new ObstacleView(obstaculo);
         obstaculos.add(obstaculo);
         obstacleViews.add(obstacleView);
         root.getChildren().add(obstacleView.getView());
+        
+        System.out.println("✅ Obstáculo criado via Factory Method: " + obstaculo.getTipo());
+        
     }
+
 
     private void atualizarObstaculos() {
         for (int i = obstaculos.size() - 1; i >= 0; i--) {
@@ -230,7 +236,7 @@ private boolean colidiuComPlayer(Obstacle obstaculo) {
     double obstacleWidth = obstaculo.getWidth();
     double obstacleHeight = obstaculo.getHeight();
     
-    // ✅ COLISÃO SIMPLES E PRECISA
+    //  COLISÃO SIMPLES E PRECISA
     boolean colisaoHorizontal = playerX < obstacleX + obstacleWidth && 
                                playerX + playerWidth > obstacleX;
     
@@ -239,7 +245,7 @@ private boolean colidiuComPlayer(Obstacle obstaculo) {
     
     boolean colidindo = colisaoHorizontal && colisaoVertical;
     
-    // ✅ DEBUG MELHORADO - COM NOME DO OBSTÁCULO
+    //  DEBUG MELHORADO - COM NOME DO OBSTÁCULO
     if (colidindo) {
         System.out.println("💥 COLISÃO REAL DETECTADA:");
         System.out.println("   Carro:     X=" + playerX + " Y=" + playerY + " W=" + playerWidth + " H=" + playerHeight);
@@ -247,11 +253,11 @@ private boolean colidiuComPlayer(Obstacle obstaculo) {
         System.out.println("   Sobreposição X: " + colisaoHorizontal);
         System.out.println("   Sobreposição Y: " + colisaoVertical);
         
-        // ✅ CALCULA A SOBREPOSIÇÃO REAL
+        //  CALCULA A SOBREPOSIÇÃO REAL
         double overlapX = Math.min(playerX + playerWidth, obstacleX + obstacleWidth) - Math.max(playerX, obstacleX);
         double overlapY = Math.min(playerY + playerHeight, obstacleY + obstacleHeight) - Math.max(playerY, obstacleY);
         System.out.println("   Sobreposição real: X=" + String.format("%.1f", overlapX) + "px, Y=" + String.format("%.1f", overlapY) + "px");
-        System.out.println("   📍 Tipo do obstáculo: " + obstaculo.getTipo());
+        System.out.println("Tipo do obstáculo: " + obstaculo.getTipo());
     }
     
     return colidindo;
